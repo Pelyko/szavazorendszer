@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="create-szavazasok" author="silye.peter98">
+        <createTable tableName="szavazasok">
+            <column name="id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="idopont" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="targy" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="elnok" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tipus" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="szavazasok"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-szavazatok" author="silye.peter98">
+        <createTable tableName="szavazatok">
+            <column name="id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="kepviselo" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="szavazat_ertek" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="szavazas_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="szavazatok"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="add-foreign-key-constraint-on-szavazatok" author="silye.peter98">
+        <addForeignKeyConstraint baseTableName="szavazatok" baseColumnNames="szavazas_id" constraintName="FK_szavazatok_szavazas_1"
+                                 referencedTableName="szavazasok"
+                                 referencedColumnNames="id"/>
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="szavazatok" constraintName="FK_szavazatok_szavazas_1"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

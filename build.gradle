@@ -1,0 +1,47 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.2.0'
+	id 'io.spring.dependency-management' version '1.1.4'
+	id 'org.liquibase.gradle' version '2.2.0'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.liquibase:liquibase-core'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.1.4'
+	implementation 'org.springframework.boot:spring-boot-gradle-plugin:3.1.2'
+	runtimeOnly 'com.h2database:h2'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+apply plugin: "org.liquibase.gradle"
+
+ext.liquibaseProps = new Properties()
+InputStream is = new FileInputStream("src/main/resources/liquibase.properties")
+liquibaseProps.load(is)
+
+liquibase {
+	activities {
+		main {
+			url liquibaseProps['spring.datasource.url']
+			username liquibaseProps['spring.datasource.user']
+			password liquibaseProps['spring.datasource.password']
+		}
+	}
+	runList = 'main'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
