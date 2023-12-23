@@ -5,7 +5,7 @@
 
     <changeSet id="create-szavazasok" author="silye.peter98">
         <createTable tableName="szavazasok">
-            <column name="id" type="int">
+            <column autoIncrement="true" name="id" type="int">
                 <constraints primaryKey="true"/>
             </column>
             <column name="idopont" type="datetime">
@@ -28,7 +28,7 @@
 
     <changeSet id="create-szavazatok" author="silye.peter98">
         <createTable tableName="szavazatok">
-            <column name="id" type="int">
+            <column autoIncrement="true" name="id" type="int">
                 <constraints primaryKey="true"/>
             </column>
             <column name="kepviselo" type="varchar">
