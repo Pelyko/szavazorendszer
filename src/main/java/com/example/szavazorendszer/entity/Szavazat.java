@@ -1,24 +1,15 @@
 package com.example.szavazorendszer.entity;
 
+import com.example.szavazorendszer.enums.SzavazatErtek;
 import jakarta.persistence.*;
 
-enum SzavazatErtek {
-    I("i"),
-    N("n"),
-    T("t");
 
-    public final String value;
-
-    private SzavazatErtek(String value){
-        this.value = value;
-    }
-}
 @Entity
 @Table(name = "szavazatok")
 public class Szavazat {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "kepviselo", nullable = false)
@@ -29,4 +20,14 @@ public class Szavazat {
 
     @ManyToOne
     private Szavazas szavazas;
+
+    public Szavazat() {
+    }
+
+    public Szavazat(String kepviselo, SzavazatErtek szavazatErtek, Szavazas szavazas) {
+        this.kepviselo = kepviselo;
+        this.szavazatErtek = szavazatErtek;
+        this.szavazas = szavazas;
+    }
+
 }

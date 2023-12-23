@@ -1,52 +1,41 @@
-package com.example.szavazorendszer.entity;
+package com.example.szavazorendszer.dto;
 
 import com.example.szavazorendszer.enums.SzavazasTipus;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-@Entity
-@Table(name = "szavazasok")
-public class Szavazas {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "idopont", nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
+public class SzavazasDTO {
+    @NotNull(message = "A szavazás időpontját meg kell adni!")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     private Date idopont;
 
-    @Column(name = "targy", nullable = false)
+    @NotEmpty(message = "A tárgyat meg kell adni!")
     private String targy;
 
-    @Column(name = "tipus", nullable = false)
+    @NotNull(message = "A szavazás típusát meg kell adni!")
     private SzavazasTipus tipus;
 
-    @Column(name = "elnok", nullable = false)
+    @NotEmpty(message = "A szavazás elnökét meg kell adni!")
     private String elnok;
 
-    @OneToMany(mappedBy = "szavazas")
-    private List<Szavazat> szavazatok;
 
-    public Szavazas() {
-    }
+    private List<SzavazatDTO> szavazatok;
 
-    public Szavazas(Date idopont, String targy, SzavazasTipus tipus, String elnok) {
+    public SzavazasDTO(Date idopont, String targy, SzavazasTipus tipus, String elnok, List<SzavazatDTO> szavazatok) throws ParseException {
         this.idopont = idopont;
         this.targy = targy;
         this.tipus = tipus;
         this.elnok = elnok;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+        this.szavazatok = szavazatok;
     }
 
     public Date getIdopont() {
@@ -81,11 +70,11 @@ public class Szavazas {
         this.elnok = elnok;
     }
 
-    public List<Szavazat> getSzavazatok() {
+    public List<SzavazatDTO> getSzavazatok() {
         return szavazatok;
     }
 
-    public void setSzavazatok(List<Szavazat> szavazatok) {
+    public void setSzavazatok(List<SzavazatDTO> szavazatok) {
         this.szavazatok = szavazatok;
     }
 }
