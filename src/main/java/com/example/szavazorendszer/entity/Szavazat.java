@@ -30,4 +30,35 @@ public class Szavazat {
         this.szavazas = szavazas;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getKepviselo() {
+        return kepviselo;
+    }
+
+    public void setKepviselo(String kepviselo) {
+        this.kepviselo = kepviselo;
+    }
+
+    public SzavazatErtek getSzavazatErtek() {
+        return szavazatErtek;
+    }
+
+    public void setSzavazatErtek(SzavazatErtek szavazatErtek) {
+        this.szavazatErtek = szavazatErtek;
+    }
+
+    public Szavazas getSzavazas() {
+        return szavazas;
+    }
+
+    public void setSzavazas(Szavazas szavazas) {
+        this.szavazas = szavazas;
+    }
 }
