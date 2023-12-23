@@ -1,5 +1,6 @@
 package com.example.szavazorendszer.service;
 
+import com.example.szavazorendszer.exception.VoteNotFoundException;
 import com.example.szavazorendszer.repository.SzavazasRepository;
 import com.example.szavazorendszer.dto.SzavazasDTO;
 import com.example.szavazorendszer.entity.Szavazas;
@@ -8,6 +9,8 @@ import com.example.szavazorendszer.repository.SzavazatRepository;
 import com.example.szavazorendszer.validation.SzavazasValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class SzavazasService {
@@ -41,5 +44,13 @@ public class SzavazasService {
         );
 
         return id;
+    }
+
+    public String findVote(Long szavazas, String kepviselo) throws VoteNotFoundException {
+        List<Szavazat> szavazatok = szavazatRepository.findBySzavazasAndKepviselo(szavazas,kepviselo);
+        if(szavazatok.isEmpty()){
+            throw new VoteNotFoundException("A keresett szavazat nem található.");
+        }
+        return szavazatok.get(0).getSzavazatErtek().value;
     }
 }
