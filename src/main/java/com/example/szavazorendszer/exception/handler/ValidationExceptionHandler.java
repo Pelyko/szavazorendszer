@@ -1,5 +1,6 @@
 package com.example.szavazorendszer.exception.handler;
 
+import com.example.szavazorendszer.exception.ElectionNotFoundException;
 import com.example.szavazorendszer.exception.VoteNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ValidationException;
@@ -75,5 +76,16 @@ public class ValidationExceptionHandler{
         Map<String, List<String>> result = new HashMap<>();
         result.put("errors", errors);
         return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ElectionNotFoundException.class)
+    public ResponseEntity<?> handleElectionNotFound(ElectionNotFoundException ex, HttpServletRequest request){
+        List<String> errors = new ArrayList<>();
+
+        errors.add(ex.getMessage());
+
+        Map<String, List<String>> result = new HashMap<>();
+        result.put("errors", errors);
+        return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
     }
 }
