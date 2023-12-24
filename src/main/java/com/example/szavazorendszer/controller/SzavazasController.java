@@ -1,6 +1,8 @@
 package com.example.szavazorendszer.controller;
 
+import com.example.szavazorendszer.dto.SzavazasAdatokDTO;
 import com.example.szavazorendszer.dto.SzavazasDTO;
+import com.example.szavazorendszer.exception.ElectionNotFoundException;
 import com.example.szavazorendszer.exception.VoteNotFoundException;
 import com.example.szavazorendszer.service.SzavazasService;
 import jakarta.validation.Valid;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.xml.bind.ValidationException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Controller
@@ -35,6 +38,19 @@ public class SzavazasController{
         Map<String,String> response = new HashMap<>();
         response.put("szavazat",szavazatErtek);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping(value="/eredmeny")
+    public @ResponseBody ResponseEntity<?> electionResult(@RequestParam @Valid Long szavazas) throws ElectionNotFoundException {
+        SzavazasAdatokDTO szavazasAdatokDTO = szavazasService.getDataOfElection(szavazas);
+        Map<String,Object> response = new LinkedHashMap<>();
+        response.put("eredmeny",szavazasAdatokDTO.getSzavazasEredmeny().value);
+        response.put("kepviselokSzama",szavazasAdatokDTO.getKepviselokSzama());
+        response.put("igenekSzama",szavazasAdatokDTO.getIgenekSzama());
+        response.put("nemekSzama",szavazasAdatokDTO.getNemekSzama());
+        response.put("tartozkodasokSzama",szavazasAdatokDTO.getTartozkodasokSzama());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+
     }
 
 }

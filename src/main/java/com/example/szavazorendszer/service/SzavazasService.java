@@ -1,5 +1,10 @@
 package com.example.szavazorendszer.service;
 
+import com.example.szavazorendszer.dto.SzavazasAdatokDTO;
+import com.example.szavazorendszer.enums.SzavazasEredmeny;
+import com.example.szavazorendszer.enums.SzavazasTipus;
+import com.example.szavazorendszer.enums.SzavazatErtek;
+import com.example.szavazorendszer.exception.ElectionNotFoundException;
 import com.example.szavazorendszer.exception.VoteNotFoundException;
 import com.example.szavazorendszer.repository.SzavazasRepository;
 import com.example.szavazorendszer.dto.SzavazasDTO;
@@ -15,6 +20,7 @@ import java.util.List;
 @Service
 public class SzavazasService {
 
+    private static final int OSSZ_KEPVISELO = 200;
     @Autowired
     private SzavazasValidator szavazasValidator;
     @Autowired
@@ -52,5 +58,62 @@ public class SzavazasService {
             throw new VoteNotFoundException("A keresett szavazat nem található.");
         }
         return szavazatok.get(0).getSzavazatErtek().value;
+    }
+
+    public SzavazasAdatokDTO getDataOfElection(Long szavazas) throws ElectionNotFoundException {
+        List<Szavazas> szavazasok = szavazasRepository.findElectionById(szavazas);
+        if(szavazasok.isEmpty()){
+            throw new ElectionNotFoundException("Nem található a megadott ID-val szavazás.");
+        }
+
+        SzavazasAdatokDTO szavazasAdatokDTO = new SzavazasAdatokDTO();
+        szavazasAdatokDTO.setSzavazasEredmeny(evalElection(szavazasok.get(0)));
+
+        switch(szavazasok.get(0).getTipus()){
+            case e:
+                szavazasAdatokDTO.setKepviselokSzama(getNumberOfPresentRepresentatives(szavazasok.get(0)));
+                break;
+            case m:
+                szavazasAdatokDTO.setKepviselokSzama(OSSZ_KEPVISELO);
+                break;
+            default:
+                szavazasAdatokDTO.setKepviselokSzama(szavazasok.get(0).getSzavazatok().size());
+        }
+
+        szavazasAdatokDTO.setIgenekSzama((int) szavazasok.get(0).getSzavazatok().stream().filter(sz -> sz.getSzavazatErtek().equals(SzavazatErtek.i)).count());
+        szavazasAdatokDTO.setNemekSzama((int) szavazasok.get(0).getSzavazatok().stream().filter(sz -> sz.getSzavazatErtek().equals(SzavazatErtek.n)).count());
+        szavazasAdatokDTO.setTartozkodasokSzama((int) szavazasok.get(0).getSzavazatok().stream().filter(sz -> sz.getSzavazatErtek().equals(SzavazatErtek.t)).count());
+
+        return szavazasAdatokDTO;
+    }
+
+    private SzavazasEredmeny evalElection(Szavazas szavazas) throws ElectionNotFoundException {
+
+        if(szavazas.getTipus().equals(SzavazasTipus.j)){
+            return SzavazasEredmeny.ELFOGADOTT;
+        }
+
+        if(szavazas.getTipus().equals(SzavazasTipus.m)){
+            return szavazas.getSzavazatok().stream()
+                    .filter(sz -> sz.getSzavazatErtek().equals(SzavazatErtek.i))
+                    .count() > OSSZ_KEPVISELO / 2
+                    ? SzavazasEredmeny.ELFOGADOTT
+                    : SzavazasEredmeny.ELUTASITOTT;
+        }
+
+        //A feladat nem tér ki arra az esetre, ha nem volt még jelenléti szavazás. Úgy döntöttem, hogy ilyenkor Exception dobódik.
+        return szavazas.getSzavazatok().stream()
+                .filter(sz -> sz.getSzavazatErtek().equals(SzavazatErtek.i))
+                .count() > getNumberOfPresentRepresentatives(szavazas) / 2
+                ? SzavazasEredmeny.ELFOGADOTT
+                : SzavazasEredmeny.ELUTASITOTT;
+    }
+
+    private int getNumberOfPresentRepresentatives(Szavazas szavazas) throws ElectionNotFoundException {
+        List<Szavazas> utolsoJelenletiSzavazas = szavazasRepository.findLastPresentElectionBeforeDateByType(szavazas.getIdopont(),SzavazasTipus.j);
+        if(utolsoJelenletiSzavazas.isEmpty()){
+            throw new ElectionNotFoundException("Nem található a szavazást megelőző jelenléti szavazás.");
+        }
+        return utolsoJelenletiSzavazas.get(0).getSzavazatok().size();
     }
 }
