@@ -1,6 +1,7 @@
 package com.example.szavazorendszer.validation;
 
-import javax.xml.bind.ValidationException;
+import jakarta.validation.ValidationException;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,7 +14,7 @@ public class DateValidator {
         this.dateFormat = dateFormat;
     }
 
-    public Date validate(String date) throws ValidationException {
+    public Date validate(String date) {
         DateFormat sdf = new SimpleDateFormat(this.dateFormat);
         sdf.setLenient(false);
         try {

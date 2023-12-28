@@ -41,14 +41,7 @@ public class SzavazasController{
 
     @GetMapping(value="/eredmeny")
     public @ResponseBody ResponseEntity<?> electionResult(@RequestParam @Valid Long szavazas) throws ElectionNotFoundException {
-        SzavazasAdatokDTO szavazasAdatokDTO = szavazasService.getDataOfElection(szavazas);
-        Map<String,Object> response = new LinkedHashMap<>();
-        response.put("eredmeny",szavazasAdatokDTO.getSzavazasEredmeny().value);
-        response.put("kepviselokSzama",szavazasAdatokDTO.getKepviselokSzama());
-        response.put("igenekSzama",szavazasAdatokDTO.getIgenekSzama());
-        response.put("nemekSzama",szavazasAdatokDTO.getNemekSzama());
-        response.put("tartozkodasokSzama",szavazasAdatokDTO.getTartozkodasokSzama());
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(szavazasService.getDataOfElection(szavazas), HttpStatus.OK);
 
     }
 
