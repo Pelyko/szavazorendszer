@@ -130,24 +130,20 @@ public class SzavazasService {
         return mapSzavazasEntityToDTO(szavazasok);
     }
 
-    private List<SzavazasMindenAdatDTO> mapSzavazasEntityToDTO(List<Szavazas> szavazasok) throws ElectionNotFoundException{
+    private List<SzavazasMindenAdatDTO> mapSzavazasEntityToDTO(List<Szavazas> szavazasok) throws ElectionNotFoundException {
         List<SzavazasMindenAdatDTO> szavazasokDto = new ArrayList<>();
-        szavazasok.forEach(sz -> {
-            try {
-                SzavazasMindenAdatDTO szavazasDto = new SzavazasMindenAdatDTO(
-                        sz.getIdopont(),
-                        sz.getTargy(),
-                        sz.getTipus(),
-                        sz.getElnok(),
-                        evalElection(sz),
-                        getNumberOfPresentRepresentatives(sz),
-                        mapSzavazatEntityToDto(sz.getSzavazatok())
-                );
-                szavazasokDto.add(szavazasDto);
-            } catch (ElectionNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        for (Szavazas sz : szavazasok) {
+            SzavazasMindenAdatDTO szavazasDto = new SzavazasMindenAdatDTO(
+                    sz.getIdopont(),
+                    sz.getTargy(),
+                    sz.getTipus(),
+                    sz.getElnok(),
+                    evalElection(sz),
+                    getNumberOfPresentRepresentatives(sz),
+                    mapSzavazatEntityToDto(sz.getSzavazatok())
+            );
+            szavazasokDto.add(szavazasDto);
+        }
         return szavazasokDto;
     }
 
