@@ -28,7 +28,7 @@ public class Szavazas {
     @Column(name = "elnok", nullable = false)
     private String elnok;
 
-    @OneToMany(mappedBy = "szavazas")
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "szavazas")
     private List<Szavazat> szavazatok;
 
     public Szavazas() {

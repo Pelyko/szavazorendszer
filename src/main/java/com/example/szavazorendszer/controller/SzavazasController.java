@@ -2,6 +2,7 @@ package com.example.szavazorendszer.controller;
 
 import com.example.szavazorendszer.dto.SzavazasAdatokDTO;
 import com.example.szavazorendszer.dto.SzavazasDTO;
+import com.example.szavazorendszer.dto.SzavazasMindenAdatDTO;
 import com.example.szavazorendszer.exception.ElectionNotFoundException;
 import com.example.szavazorendszer.exception.VoteNotFoundException;
 import com.example.szavazorendszer.service.SzavazasService;
@@ -13,9 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.xml.bind.ValidationException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping(value = "/szavazasok")
@@ -51,6 +50,14 @@ public class SzavazasController{
         response.put("tartozkodasokSzama",szavazasAdatokDTO.getTartozkodasokSzama());
         return new ResponseEntity<>(response, HttpStatus.OK);
 
+    }
+
+    @GetMapping(value="/napi-szavazasok")
+    public @ResponseBody ResponseEntity<?> dailyElections(@RequestParam @Valid String nap) throws ValidationException, ElectionNotFoundException {
+        List<SzavazasMindenAdatDTO> szavazasok = szavazasService.getElectionsDataByDate(nap);
+        Map<String,List<SzavazasMindenAdatDTO>> response = new HashMap<>();
+        response.put("szavazasok", szavazasok);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }

@@ -1,6 +1,8 @@
 package com.example.szavazorendszer.service;
 
 import com.example.szavazorendszer.dto.SzavazasAdatokDTO;
+import com.example.szavazorendszer.dto.SzavazasMindenAdatDTO;
+import com.example.szavazorendszer.dto.SzavazatDTO;
 import com.example.szavazorendszer.enums.SzavazasEredmeny;
 import com.example.szavazorendszer.enums.SzavazasTipus;
 import com.example.szavazorendszer.enums.SzavazatErtek;
@@ -11,10 +13,14 @@ import com.example.szavazorendszer.dto.SzavazasDTO;
 import com.example.szavazorendszer.entity.Szavazas;
 import com.example.szavazorendszer.entity.Szavazat;
 import com.example.szavazorendszer.repository.SzavazatRepository;
+import com.example.szavazorendszer.validation.DateValidator;
 import com.example.szavazorendszer.validation.SzavazasValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.xml.bind.ValidationException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -115,5 +121,45 @@ public class SzavazasService {
             throw new ElectionNotFoundException("Nem található a szavazást megelőző jelenléti szavazás.");
         }
         return utolsoJelenletiSzavazas.get(0).getSzavazatok().size();
+    }
+
+    public List<SzavazasMindenAdatDTO> getElectionsDataByDate(String dateString) throws ValidationException,ElectionNotFoundException {
+        DateValidator dateValidator = new DateValidator("yyyy-MM-dd");
+        Date date = dateValidator.validate(dateString);
+        List<Szavazas> szavazasok = szavazasRepository.findElectionByDate(date);
+        return mapSzavazasEntityToDTO(szavazasok);
+    }
+
+    private List<SzavazasMindenAdatDTO> mapSzavazasEntityToDTO(List<Szavazas> szavazasok) throws ElectionNotFoundException{
+        List<SzavazasMindenAdatDTO> szavazasokDto = new ArrayList<>();
+        szavazasok.forEach(sz -> {
+            try {
+                SzavazasMindenAdatDTO szavazasDto = new SzavazasMindenAdatDTO(
+                        sz.getIdopont(),
+                        sz.getTargy(),
+                        sz.getTipus(),
+                        sz.getElnok(),
+                        evalElection(sz),
+                        getNumberOfPresentRepresentatives(sz),
+                        mapSzavazatEntityToDto(sz.getSzavazatok())
+                );
+                szavazasokDto.add(szavazasDto);
+            } catch (ElectionNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return szavazasokDto;
+    }
+
+    private List<SzavazatDTO> mapSzavazatEntityToDto(List<Szavazat> szavazatok){
+        List<SzavazatDTO> szavazatokDto = new ArrayList<>();
+        szavazatok.forEach(sz -> {
+            SzavazatDTO szavazatDto = new SzavazatDTO(
+                    sz.getKepviselo(),
+                    sz.getSzavazatErtek()
+            );
+            szavazatokDto.add(szavazatDto);
+        });
+        return szavazatokDto;
     }
 }
