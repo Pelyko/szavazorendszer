@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import javax.xml.bind.ValidationException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.IntSummaryStatistics;
 import java.util.List;
 
 @Service
@@ -157,5 +158,14 @@ public class SzavazasService {
             szavazatokDto.add(szavazatDto);
         });
         return szavazatokDto;
+    }
+
+    //Nem volt megadva milyen formátumban várja a kérés a dátumot, így én a korábban használt ISO-8061-et vettem alapul.
+    public double getAverageNumberOfElectionsByRepresentatives(String kezdoDatumStr, String vegDatumStr) {
+        DateValidator dateValidator = new DateValidator("yyyy-MM-dd'T'HH:mm:ssXXX");
+        Date kezdoDatum = dateValidator.validate(kezdoDatumStr);
+        Date vegDatum = dateValidator.validate(vegDatumStr);
+        List<Integer> kepviselok = szavazasRepository.getNumberOfElectionsByRepresentativesBetweenDates(kezdoDatum,vegDatum);
+        return kepviselok.stream().mapToInt(Integer::intValue).summaryStatistics().getAverage();
     }
 }

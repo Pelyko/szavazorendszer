@@ -21,4 +21,7 @@ public interface SzavazasRepository extends JpaRepository<Szavazas,Long> {
 
     @Query("SELECT szavazas FROM Szavazas szavazas JOIN Szavazat szavazat ON szavazat.szavazas = szavazas WHERE datediff(day,:idopont,szavazas.idopont) = 0")
     List<Szavazas> findElectionByDate(@Param("idopont") Date idopont);
+
+    @Query("SELECT COUNT(szavazas) FROM Szavazas szavazas JOIN Szavazat szavazat ON szavazat.szavazas = szavazas WHERE szavazas.idopont BETWEEN :kezdoDatum AND :vegDatum AND szavazas.tipus != SzavazasTipus.j GROUP BY szavazat.kepviselo")
+    List<Integer> getNumberOfElectionsByRepresentativesBetweenDates(@Param("kezdoDatum") Date kezdoDatum, @Param("vegDatum") Date vegDatum);
 }
