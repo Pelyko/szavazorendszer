@@ -53,4 +53,11 @@ public class SzavazasController{
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping(value="/kepviselo-reszvetel-atlag")
+    public @ResponseBody ResponseEntity<?> averageRepresentativeParticipation(@RequestParam @Valid String kezdoDatum, @RequestParam @Valid String vegDatum) {
+        Map<String,Double> response = new HashMap<>();
+        response.put("atlag",szavazasService.getAverageNumberOfElectionsByRepresentatives(kezdoDatum,vegDatum));
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }
