@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.text.ParseException;
@@ -27,7 +28,7 @@ public class SzavazasDTO {
     @NotEmpty(message = "A szavazás elnökét meg kell adni!")
     private String elnok;
 
-
+    @NotEmpty(message = "Meg kell adni legalább 1 szavazatot.")
     private List<SzavazatDTO> szavazatok;
 
     public SzavazasDTO(Date idopont, String targy, SzavazasTipus tipus, String elnok, List<SzavazatDTO> szavazatok) throws ParseException {

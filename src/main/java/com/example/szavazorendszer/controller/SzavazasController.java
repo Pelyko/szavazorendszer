@@ -24,7 +24,7 @@ public class SzavazasController{
     private SzavazasService szavazasService;
 
     @PostMapping(value="/szavazas")
-    public @ResponseBody ResponseEntity<?> election(@RequestBody @Valid SzavazasDTO szavazas) {
+    public @ResponseBody ResponseEntity<?> election(@RequestBody @Valid SzavazasDTO szavazas) throws ValidationException {
         Long id = szavazasService.registerElection(szavazas);
         Map<String,Long> response = new HashMap<>();
         response.put("szavazasId",id);
@@ -32,7 +32,7 @@ public class SzavazasController{
     }
 
     @GetMapping(value="/szavazat")
-    public @ResponseBody ResponseEntity<?> vote(@RequestParam @Valid Long szavazas, @RequestParam String kepviselo) throws VoteNotFoundException {
+    public @ResponseBody ResponseEntity<?> vote(@RequestParam Long szavazas, @RequestParam String kepviselo) throws VoteNotFoundException {
         String szavazatErtek = szavazasService.findVote(szavazas,kepviselo);
         Map<String,String> response = new HashMap<>();
         response.put("szavazat",szavazatErtek);
@@ -40,13 +40,13 @@ public class SzavazasController{
     }
 
     @GetMapping(value="/eredmeny")
-    public @ResponseBody ResponseEntity<?> electionResult(@RequestParam @Valid Long szavazas) throws ElectionNotFoundException {
+    public @ResponseBody ResponseEntity<?> electionResult(@RequestParam Long szavazas) throws ElectionNotFoundException {
         return new ResponseEntity<>(szavazasService.getDataOfElection(szavazas), HttpStatus.OK);
 
     }
 
     @GetMapping(value="/napi-szavazasok")
-    public @ResponseBody ResponseEntity<?> dailyElections(@RequestParam @Valid String nap) throws ValidationException, ElectionNotFoundException {
+    public @ResponseBody ResponseEntity<?> dailyElections(@RequestParam String nap) throws ValidationException, ElectionNotFoundException {
         List<SzavazasMindenAdatDTO> szavazasok = szavazasService.getElectionsDataByDate(nap);
         Map<String,List<SzavazasMindenAdatDTO>> response = new HashMap<>();
         response.put("szavazasok", szavazasok);

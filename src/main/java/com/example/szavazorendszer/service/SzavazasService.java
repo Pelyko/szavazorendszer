@@ -15,10 +15,12 @@ import com.example.szavazorendszer.entity.Szavazat;
 import com.example.szavazorendszer.repository.SzavazatRepository;
 import com.example.szavazorendszer.validation.DateValidator;
 import com.example.szavazorendszer.validation.SzavazasValidator;
+import com.example.szavazorendszer.validation.SzavazatValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.ValidationException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.IntSummaryStatistics;
@@ -31,10 +33,15 @@ public class SzavazasService {
     @Autowired
     private SzavazasValidator szavazasValidator;
     @Autowired
+    private SzavazatValidator szavazatValidator;
+    @Autowired
     private SzavazasRepository szavazasRepository;
     @Autowired
     private SzavazatRepository szavazatRepository;
-    public Long registerElection(SzavazasDTO szavazas) {
+    public Long registerElection(SzavazasDTO szavazas) throws ValidationException {
+        for(SzavazatDTO szavazat : szavazas.getSzavazatok()){
+            szavazatValidator.validate(szavazat);
+        }
         szavazasValidator.validate(szavazas);
 
         Szavazas szavazasEntity = new Szavazas(
@@ -166,6 +173,7 @@ public class SzavazasService {
         Date kezdoDatum = dateValidator.validate(kezdoDatumStr);
         Date vegDatum = dateValidator.validate(vegDatumStr);
         List<Integer> kepviselok = szavazasRepository.getNumberOfElectionsByRepresentativesBetweenDates(kezdoDatum,vegDatum);
-        return kepviselok.stream().mapToInt(Integer::intValue).summaryStatistics().getAverage();
+        DecimalFormat df = new DecimalFormat("0.00");
+        return Double.parseDouble(df.format(kepviselok.stream().mapToInt(Integer::intValue).summaryStatistics().getAverage()));
     }
 }
