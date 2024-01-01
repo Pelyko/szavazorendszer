@@ -3,7 +3,14 @@ plugins {
 	id 'org.springframework.boot' version '3.2.0'
 	id 'io.spring.dependency-management' version '1.1.4'
 	id 'org.liquibase.gradle' version '2.2.0'
+	id 'com.bmuschko.docker-spring-boot-application' version '6.2.0'
+	id 'war'
 }
+
+import com.bmuschko.gradle.docker.tasks.image.*
+import com.bmuschko.gradle.docker.tasks.container.*
+
+configurations.implementation.setCanBeResolved(true)
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
@@ -23,8 +30,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-gradle-plugin:3.1.2'
 	implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
 	implementation 'org.springframework.boot:spring-boot-starter-validation:3.1.2'
-	runtimeOnly 'com.h2database:h2'
+	implementation 'com.h2database:h2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'org.springframework.boot:spring-boot-starter-tomcat'
 }
 
 apply plugin: "org.liquibase.gradle"
@@ -46,4 +54,72 @@ liquibase {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+jar {
+	manifest {
+		attributes 'Main-Class': 'com.example.szavazorendszer.SzavazorendszerApplication'
+	}
+	archiveFileName = 'szavazorendszer.jar'
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+	from {
+		//configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+		configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) }
+
+	}
+}
+
+war {
+	manifest {
+		attributes 'Main-Class': 'com.example.szavazorendszer.SzavazorendszerApplication'
+	}
+	archiveFileName = 'szavazorendszer.war'
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+	from {
+		//configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+		configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) }
+
+	}
+}
+
+task createDockerFile(type: Dockerfile) {
+	from 'openjdk:17'
+	copyFile 'war/'+bootWar.archiveFileName.get(), '/opt/szavazorendszer/szavazorendszer.war'
+	copyFile 'liquibase/', '/opt/szavazorendszer/db/changelog'
+	copyFile 'config/', '/opt/szavazorendszer/config'
+	entryPoint 'java'
+	defaultCommand '-jar', '-Dspring.config.location=/opt/szavazorendszer/config/application.properties','-Dspring.liquibase.change-log=db/changelog/db.changelog-master.xml', '/opt/szavazorendszer/szavazorendszer.war'
+	exposePort 8080
+}
+
+task syncWar(type: Copy) {
+	dependsOn assemble
+	from war.destinationDirectory
+	into "build/docker/war"
+}
+
+task syncLiquibase(type: Copy) {
+	dependsOn assemble
+	from 'src/main/resources/db/changelog'
+	into 'build/docker/liquibase'
+}
+
+task syncConfig(type: Copy) {
+	dependsOn assemble
+	from 'src/main/resources/application.properties'
+	into 'build/docker/config'
+}
+
+task syncLiquibaseConfig(type: Copy) {
+	dependsOn assemble
+	from 'src/main/resources/liquibase.properties'
+	into 'build/docker/config'
+}
+
+task buildImage(type: DockerBuildImage) {
+	dependsOn createDockerFile, syncWar, syncLiquibase, syncConfig, syncLiquibaseConfig
+	inputDir = createDockerFile.getDestDir()
+	images = ["szavazorendszer"]
 }
